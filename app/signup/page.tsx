@@ -17,23 +17,34 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { signUp } from "@/services/auth/signUp";
+import { z } from "zod";
 
 interface FormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
+  name: string | undefined;
+  email: string | undefined;
+  password: string | undefined;
+  confirmPassword: string | undefined;
 }
+
+const formDataSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters long"),
+  email: z.email(),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z
+    .string()
+    .min(6, "Confirm Password must be at least 6 characters long"),
+});
 
 const SignupPage = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: undefined,
+    email: undefined,
+    password: undefined,
+    confirmPassword: undefined,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,17 +57,26 @@ const SignupPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const isFormDataValid = formDataSchema.safeParse(formData);
+
+    if (!isFormDataValid.success) {
+      toast.error(isFormDataValid.error.issues[0].message);
+      return;
+    }
+
+    const { name, email, password, confirmPassword } = isFormDataValid.data;
+
     if (!acceptTerms) {
       toast.error("Please accept the terms and conditions");
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
       return;
     }
@@ -64,24 +84,18 @@ const SignupPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      const response = await signUp({
+        name,
+        email,
+        password,
+        confirmPassword,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.success) {
         toast.success("Account created successfully!");
         // Auto sign in after registration
         const result = await signIn("credentials", {
-          email: formData.email,
-          password: formData.password,
+          email,
+          password,
           redirect: false,
         });
 
@@ -91,7 +105,7 @@ const SignupPage = () => {
           router.push("/onboarding");
         }
       } else {
-        toast.error(data.error || "Registration failed");
+        toast.error(response.error || "Registration failed");
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
