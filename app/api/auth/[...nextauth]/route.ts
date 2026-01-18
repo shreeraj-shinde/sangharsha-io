@@ -31,40 +31,42 @@ const authOptions: NextAuthOptions = {
         };
       },
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "dummy-client-id",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy-client-secret",
-    }),
+    // TODO : ADD Google Provder Later
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID || "dummy-client-id",
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy-client-secret",
+    // }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
-        try {
-          const client = await clientPromise;
-          const db = client.db("sangharsha");
-          const usersCollection = db.collection("users");
+    // TODO : ADD Google Provider Later
+    // async signIn({ user, account, profile }) {
+    //   if (account?.provider === "google") {
+    //     try {
+    //       const client = await clientPromise;
+    //       const db = client.db("sangharsha");
+    //       const usersCollection = db.collection("users");
 
-          const existingUser = await usersCollection.findOne({
-            email: user.email,
-          });
+    //       const existingUser = await usersCollection.findOne({
+    //         email: user.email,
+    //       });
 
-          if (!existingUser) {
-            await usersCollection.insertOne({
-              email: user.email,
-              name: user.name,
-              provider: "google",
-              createdAt: new Date(),
-              resumeScore: 0,
-              appliedJobs: 0,
-            });
-          }
-        } catch (error) {
-          console.error("Error saving Google user:", error);
-          return false;
-        }
-      }
-      return true;
-    },
+    //       if (!existingUser) {
+    //         await usersCollection.insertOne({
+    //           email: user.email,
+    //           name: user.name,
+    //           provider: "google",
+    //           createdAt: new Date(),
+    //           resumeScore: 0,
+    //           appliedJobs: 0,
+    //         });
+    //       }
+    //     } catch (error) {
+    //       console.error("Error saving Google user:", error);
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

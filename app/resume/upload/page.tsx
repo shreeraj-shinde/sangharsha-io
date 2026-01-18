@@ -18,11 +18,11 @@ import { Upload, FileText, CheckCircle, X } from "lucide-react";
 const ResumeUploadPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
@@ -31,7 +31,7 @@ const ResumeUploadPage = () => {
     setIsDragging(false);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
@@ -40,7 +40,7 @@ const ResumeUploadPage = () => {
     }
   };
 
-  const validateFile = (file) => {
+  const validateFile = (file: File) => {
     const validTypes = [
       "application/pdf",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -57,8 +57,8 @@ const ResumeUploadPage = () => {
     return true;
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file && validateFile(file)) {
       setSelectedFile(file);
     }

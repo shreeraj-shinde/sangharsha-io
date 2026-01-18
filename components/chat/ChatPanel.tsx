@@ -1,17 +1,22 @@
-'use client';
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { X, Send, Minimize2, Maximize2, Sparkles } from 'lucide-react';
-import { mockChatMessages } from '@/lib/mockData';
+"use client";
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { X, Send, Minimize2, Maximize2, Sparkles } from "lucide-react";
+import { mockChatMessages } from "@/lib/mockData";
 
-const ChatPanel = ({ isOpen, onClose }) => {
+interface ChatPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ChatPanel = ({ isOpen, onClose }: ChatPanelProps) => {
   const [messages, setMessages] = useState(mockChatMessages);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isMinimized, setIsMinimized] = useState(false);
-  const scrollAreaRef = useRef(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -24,28 +29,28 @@ const ChatPanel = ({ isOpen, onClose }) => {
 
     const newUserMessage = {
       id: `msg-${Date.now()}`,
-      type: 'user',
+      type: "user",
       text: inputValue,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, newUserMessage]);
-    setInputValue('');
+    setMessages((prev) => [...prev, newUserMessage]);
+    setInputValue("");
 
     // Simulate AI response
     setTimeout(() => {
       const aiResponse = {
         id: `msg-${Date.now() + 1}`,
-        type: 'agent',
-        text: 'Thank you for your question! I\'m here to help you with your career journey. This is a placeholder response - AI integration will be added soon.',
-        timestamp: new Date()
+        type: "agent",
+        text: "Thank you for your question! I'm here to help you with your career journey. This is a placeholder response - AI integration will be added soon.",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages((prev) => [...prev, aiResponse]);
     }, 1000);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -56,7 +61,7 @@ const ChatPanel = ({ isOpen, onClose }) => {
   return (
     <div
       className={`fixed right-6 bg-card border border-border shadow-2xl rounded-lg flex flex-col transition-all duration-300 z-50 ${
-        isMinimized ? 'bottom-6 h-16 w-80' : 'bottom-6 h-[600px] w-96'
+        isMinimized ? "bottom-6 h-16 w-80" : "bottom-6 h-[600px] w-96"
       }`}
     >
       {/* Header */}
@@ -79,7 +84,11 @@ const ChatPanel = ({ isOpen, onClose }) => {
             className="h-8 w-8 text-white hover:bg-white/20"
             onClick={() => setIsMinimized(!isMinimized)}
           >
-            {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+            {isMinimized ? (
+              <Maximize2 className="h-4 w-4" />
+            ) : (
+              <Minimize2 className="h-4 w-4" />
+            )}
           </Button>
           <Button
             size="icon"
@@ -100,22 +109,31 @@ const ChatPanel = ({ isOpen, onClose }) => {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${
+                    message.type === "user" ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                      message.type === 'user'
-                        ? 'bg-muted text-foreground'
-                        : 'gradient-primary text-white'
+                      message.type === "user"
+                        ? "bg-muted text-foreground"
+                        : "gradient-primary text-white"
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                    <p className="text-sm whitespace-pre-wrap">
+                      {message.text}
+                    </p>
                     <p
                       className={`text-xs mt-1 ${
-                        message.type === 'user' ? 'text-muted-foreground' : 'opacity-75'
+                        message.type === "user"
+                          ? "text-muted-foreground"
+                          : "opacity-75"
                       }`}
                     >
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </div>
                 </div>
@@ -130,7 +148,7 @@ const ChatPanel = ({ isOpen, onClose }) => {
                 size="sm"
                 variant="outline"
                 className="text-xs"
-                onClick={() => setInputValue('Improve my resume')}
+                onClick={() => setInputValue("Improve my resume")}
               >
                 Improve Resume
               </Button>
@@ -138,7 +156,7 @@ const ChatPanel = ({ isOpen, onClose }) => {
                 size="sm"
                 variant="outline"
                 className="text-xs"
-                onClick={() => setInputValue('Find jobs for me')}
+                onClick={() => setInputValue("Find jobs for me")}
               >
                 Find Jobs
               </Button>
@@ -146,7 +164,7 @@ const ChatPanel = ({ isOpen, onClose }) => {
                 size="sm"
                 variant="outline"
                 className="text-xs"
-                onClick={() => setInputValue('Help me apply')}
+                onClick={() => setInputValue("Help me apply")}
               >
                 Help Apply
               </Button>
