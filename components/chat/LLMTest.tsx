@@ -1,11 +1,7 @@
 "use client";
-import { sendChat } from "@/app/actions/chat";
 
 const LLMTest = () => {
-  const handleChat = async () => {
-    const response = await sendChat();
-    console.log(response);
-  };
+  const handleChat = async () => {};
 
   return (
     <div>

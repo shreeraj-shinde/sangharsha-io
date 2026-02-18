@@ -1,11 +1,8 @@
-"use server";
-
 import { z } from "zod";
-import { getUserByEmail } from "../user/getUserbyEmail";
-import { comparePassword } from "@/utils/auth";
+import api from "@/lib/api";
 
 const signInSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
@@ -21,31 +18,19 @@ export const signIn = async (credentials: {
     };
   }
 
-  const { email, password } = isUserValid.data;
-
-  const user = await getUserByEmail(email);
-
-  if (!user) {
+  try {
+    const response = await api.post("/auth/login", credentials);
     return {
-      error: "User not found",
+      success: true,
+      data: response.data.user,
+    };
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Invalid email or password";
+    return {
+      error: errorMessage,
     };
   }
-
-  const isPasswordValid = await comparePassword(password, user.password);
-
-  if (!isPasswordValid) {
-    return {
-      error: "Invalid password",
-    };
-  }
-
-  return {
-    success: true,
-    data: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    },
-  };
 };

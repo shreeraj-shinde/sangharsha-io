@@ -1,56 +1,41 @@
-"use server";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import z from "zod";
-import { createUser } from "../user/createUser";
-import { hashPassword } from "@/utils/auth";
+import api from "@/lib/api";
 
 const signUpSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters long"),
   email: z.email(),
   password: z.string().min(6, "Password must be at least 6 characters long"),
+  countryCode: z.string().min(1, "Country code is required"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
   confirmPassword: z
     .string()
     .min(6, "Confirm Password must be at least 6 characters long"),
 });
 
 export const signUp = async (userData: z.infer<typeof signUpSchema>) => {
+  // validate user data
   const isUserValid = signUpSchema.safeParse(userData);
 
+  // if user data is not valid, return error
   if (!isUserValid.success) {
     return {
       error: isUserValid.error.issues[0].message,
     };
   }
 
-  const { name, email, password, confirmPassword } = isUserValid.data;
-
-  if (password !== confirmPassword) {
-    return {
-      error: "Passwords do not match",
-    };
-  }
-
-  const hashedPassword = await hashPassword(password);
   try {
-    const user = await createUser({
-      name,
-      email,
-      password: hashedPassword,
-    });
+    const response = await api.post("/auth/signup", userData);
     return {
       success: true,
-      data: user,
+      data: response.data.user,
     };
-  } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        return {
-          error: "User already exists",
-        };
-      }
-    }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to create user";
     return {
-      error: "Failed to create user",
+      error: errorMessage,
     };
   }
 };
